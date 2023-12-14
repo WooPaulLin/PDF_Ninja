@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'Ui.ui'
+# Form implementation generated from reading ui file 'PDFninja2.ui'
 #
 # Created by: PyQt6 UI code generator 6.6.1
 #
@@ -10,83 +10,85 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtPdf import QPdfDocument
 from datetime import date
-import PyPDF2
+import difflib
+
+class Ui_Form(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.resize(875, 913)
+        Form.setTabletTracking(False)
+        self.modeTab = QtWidgets.QTabWidget(parent=Form)
+        self.modeTab.setGeometry(QtCore.QRect(20, 40, 831, 861))
+        self.modeTab.setObjectName("modeTab")
+        self.mode = 0
+        def mode_change():
+            num = self.modeTab.currentIndex()
+            self.mode = num
+            if self.mode == 1:
+                self.export_btn.setDisabled(True)
+            else:
+                self.export_btn.setDisabled(False)
+            print(num)
+        self.modeTab.currentChanged.connect(mode_change)
+    
 
 
-class Ui_MainWindow(object):     
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1039, 881)
-        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 60, 1021, 781))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
+### Button
 
-        self.select = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.select.setGeometry(QtCore.QRect(10, 10, 261, 32))
-        self.select.setObjectName("select")
+        self.select_file_btn = QtWidgets.QPushButton(parent=Form)
+        self.select_file_btn.setGeometry(QtCore.QRect(20, 10, 113, 32))
+        self.select_file_btn.setObjectName("select_file_btn")
         
-        self.pdf_view = QPdfView(self.horizontalLayoutWidget)
-        self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
-        self.pdf_view.setObjectName("pdf_view")
-        self.pdf = QPdfDocument(None)
-        
-        self.horizontalLayout.addWidget(self.pdf_view)
-
         self.file_path = None
         self.pass_word = None
+
+        self.c1 = None
+        self.c2 = None
         def open_file():
             try:
-                filePath , filterType = QtWidgets.QFileDialog.getOpenFileNames(filter='PDF (*.pdf)')  # 選擇檔案對話視窗
-                self.pdf.load(filePath[0])
-                print(self.pdf.status())
-                if self.pdf.status() == QPdfDocument.Status.Error:
-                    self.pass_word = warn(0)
-                    self.pdf.setPassword(self.pass_word)
-                    self.pdf.load(filePath[0])
-                self.pdf_view.setDocument(self.pdf)
-                self.pdf_view.show()
-                self.file_path = str(filePath[0])
+                filePath , filterType = QtWidgets.QFileDialog.getOpenFileNames(filter='PDF (*.pdf)')
+                if self.mode == 0:
+                    k = 1  # 選擇檔案對話視窗
+                else: k = 2
+
+                for p in range(k):
+                    self.pdf.load(filePath[p])
+
+                    if self.pdf.status() == QPdfDocument.Status.Error:
+                        self.pass_word = warn(0) #輸入密碼
+                        self.pdf.setPassword(self.pass_word) 
+                        self.pdf.load(filePath[p])
+
+                    self.file_path = filePath[p]
+                    self.text = '\n'.join([self.pdf.getAllText(i).text() for i in range(self.pdf.pageCount())])
+                    if self.mode == 0:
+                        print('convert')
+                        self.convertPdfView.setDocument(self.pdf)
+                        self.convertPdfView.show()
+                    elif self.mode == 1:
+                        print('compare')
+                        if p == 0:
+                            self.compareTextBrowser1.clear()
+                            self.compareTextBrowser1.setText(self.text)
+                            self.c1 =self.text
+                            self.f1_path.setText(self.file_path.split('/')[-1])
+                            print('compare1_success')
+                        elif p == 1:
+                            self.compareTextBrowser2.clear()
+                            self.compareTextBrowser2.setText(self.text)
+                            self.c2 = self.text
+                            self.f2_path.setText(self.file_path.split('/')[-1])
+                            print('compare2_success')
             except:
                 pass
-           
-            
-        self.select.clicked.connect(open_file)
 
-        
-        self.convert = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.convert.setGeometry(QtCore.QRect(280, 10, 113, 32))
-        self.convert.setObjectName("convert")
-        self.text = None
-        def text_extractor():
-            self.text = ''
-            if self.file_path != None:
-                try:
-                     with open(self.file_path, 'rb') as f:
-                        f = PyPDF2.PdfReader(self.file_path)
-                        self.text = '\n'.join([f.pages[i].extract_text() for i in range(len(f.pages))])
-                except:
-                    warn(4)
-            else:
-                warn(12)
-            self.txt_view.clear()
-            self.txt_view.setText(self.text)
-        self.convert.clicked.connect(text_extractor)
+        self.select_file_btn.clicked.connect(open_file)
 
-        self.txt_view = QtWidgets.QTextBrowser(parent=self.horizontalLayoutWidget)
-        self.txt_view.setObjectName("txt_view")
-        self.horizontalLayout.addWidget(self.txt_view)
+        self.export_btn = QtWidgets.QPushButton(parent=Form)
+        self.export_btn.setGeometry(QtCore.QRect(140, 10, 113, 32))
+        self.export_btn.setObjectName("export_btn")
 
-        
-        self.export_2 = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.export_2.setGeometry(QtCore.QRect(390, 10, 113, 32))
-        self.export_2.setObjectName("export_2")
-        
-        def save_file():
+        def save_file(mode=self.mode):
             if self.text != None:
                 save_path = QtWidgets.QFileDialog.getExistingDirectory()
                 try:
@@ -101,7 +103,132 @@ class Ui_MainWindow(object):
             else:
                 warn(32)
 
-        self.export_2.clicked.connect(save_file)
+        self.export_btn.clicked.connect(save_file)
+
+### Convert
+        self.convert = QtWidgets.QWidget()
+        self.convert.setObjectName("convert")
+
+        self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.convert)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 821, 791))
+        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
+
+        self.convertLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
+        self.convertLayout.setContentsMargins(0, 0, 0, 0)
+        self.convertLayout.setObjectName("convertLayout")
+
+        self.convertPdfView = QPdfView(self.horizontalLayoutWidget)
+        self.convertPdfView.setPageMode(QPdfView.PageMode.MultiPage)
+        self.convertPdfView.setObjectName("convertPdfView")
+        self.pdf = QPdfDocument(None)
+        self.convertLayout.addWidget(self.convertPdfView)
+        
+
+        self.convertTextBrowser = QtWidgets.QTextBrowser(parent=self.horizontalLayoutWidget)
+        self.convertTextBrowser.setObjectName("convertTextBrowser")
+        self.convertLayout.addWidget(self.convertTextBrowser)
+
+        self.covert_btn = QtWidgets.QPushButton(parent=self.convert)
+        self.covert_btn.setGeometry(QtCore.QRect(360, 800, 113, 32))
+        self.covert_btn.setObjectName("covert_btn")
+
+        self.text = None
+        def text_extractor():
+            self.text = ''
+            if self.pdf.pageCount() != 0:
+                try:
+                    corpus = '\n'.join([self.pdf.getAllText(i).text() for i in range(self.pdf.pageCount())])
+                    self.text = corpus
+                except:
+                    warn(4)
+            else:
+                warn(12)
+            self.convertTextBrowser.clear()
+            self.convertTextBrowser.setText(self.text)
+        self.covert_btn.clicked.connect(text_extractor)
+
+
+
+        self.modeTab.addTab(self.convert, "")
+    
+
+
+ #### COPARE       
+        self.compare = QtWidgets.QWidget()
+        self.compare.setObjectName("compare")
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=self.compare)
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(0, -1, 821, 791))
+        self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
+        self.compareLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.compareLayout.setContentsMargins(0, 0, 0, 0)
+        self.compareLayout.setObjectName("compareLayout")
+        self.compareTextBrowser1 = QtWidgets.QTextBrowser(parent=self.horizontalLayoutWidget_2)
+        self.compareTextBrowser1.setObjectName("compareTextBrowser1")
+        self.compareLayout.addWidget(self.compareTextBrowser1)
+        self.compareTextBrowser2 = QtWidgets.QTextBrowser(parent=self.horizontalLayoutWidget_2)
+        self.compareTextBrowser2.setObjectName("compareTextBrowser2")
+        self.compareLayout.addWidget(self.compareTextBrowser2)
+
+
+        self.compare_btn = QtWidgets.QPushButton(parent=self.compare)
+        self.compare_btn.setGeometry(QtCore.QRect(360, 800, 113, 32))
+        self.compare_btn.setObjectName("compare_btn")
+        def compare_diff():
+            try:
+                self.c1 = ('<br> '.join(self.c1.splitlines())).split()
+                self.c2 = ('<br> '.join(self.c2.splitlines())).split()
+                s = difflib.SequenceMatcher(None, self.c1, self.c2)
+                opc = s.get_opcodes()
+            except:
+                warn(12)
+                return
+
+            c1_comp = []
+            c2_comp = []
+            for tag, o1, o2, n1, n2 in opc:
+                if tag == 'replace':
+                    x = difflib.SequenceMatcher(lambda x : x in ' ',''.join(self.c1[o1:o2]),''.join(self.c2[n1:n2])).ratio()
+                    
+                    if x < 0.95:
+                        print(x)
+                        c1_comp.append('<p style="color:blue;">' + ''.join(self.c1[o1:o2])+ "</p>")
+                        c2_comp.append('<p style="color:yellow;">' + ''.join(self.c2[n1:n2]) + "</p>")
+                    else:
+                        c1_comp.append(" ".join(self.c1[o1:o2]))
+                        c2_comp.append(" ".join(self.c2[n1:n2]))
+                elif tag == 'insert':
+                    c2_comp.append('<p style="color:green;">' + ''.join(self.c2[n1:n2]) + "</p>")
+                elif tag == 'delete':
+                    c1_comp.append('<p style="color:red;">' + ''.join(self.c1[o1:o2])+ "</p>")
+                else:
+                    c1_comp.append("".join(self.c1[o1:o2]))
+                    c2_comp.append("".join(self.c2[n1:n2]))
+            temp = '''<html>
+            </head>
+            <body>
+            '''
+            self.c1 = temp+''.join(c1_comp)+'''</body></html>'''
+            self.compareTextBrowser1.clear()
+            self.compareTextBrowser1.setHtml(self.c1)
+            self.c2 = temp+''.join(c2_comp)+'''</body></html>'''
+            self.compareTextBrowser2.clear()
+            self.compareTextBrowser2.setHtml(self.c2)
+        self.compare_btn.clicked.connect(compare_diff)
+
+        self.f1_path = QtWidgets.QLabel(parent=self.compare)
+        self.f1_path.setGeometry(QtCore.QRect(70, 800,241,21))
+        self.f1_path.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.f2_path = QtWidgets.QLabel(parent=self.compare)
+        self.f2_path.setGeometry(QtCore.QRect(510, 800,241,21))
+        self.f2_path.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+
+        self.modeTab.addTab(self.compare, "")
+
+
+        self.retranslateUi(Form)
+        # self.modeTab.setCurrentIndex(1)
+        QtCore.QMetaObject.connectSlotsByName(Form)
 
         def warn(n):
             mbox = QtWidgets.QMessageBox(QtWidgets.QWidget())
@@ -123,38 +250,23 @@ class Ui_MainWindow(object):
                 p, ok = passw.getText(QtWidgets.QWidget(), '','input password')
                 return p
 
-            
-
-
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.actionDownload_Path = QtGui.QAction(parent=MainWindow)
-        self.actionDownload_Path.setObjectName("actionDownload_Path")
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.convert.setText(_translate("MainWindow", "Convert"))
-        self.export_2.setText(_translate("MainWindow", "Export"))
-        self.select.setText(_translate("MainWindow", "Select File"))
-        self.actionDownload_Path.setText(_translate("MainWindow", "Download Path"))
+        Form.setWindowTitle(_translate("Form", "PDF ninja"))
+        self.modeTab.setWhatsThis(_translate("Form", "<html><head/><body><p>Convert</p></body></html>"))
+        self.covert_btn.setText(_translate("Form", "Convert"))
+        self.modeTab.setTabText(self.modeTab.indexOf(self.convert), _translate("Form", "Convert"))
+        self.compare_btn.setText(_translate("Form", "Compare"))
+        self.modeTab.setTabText(self.modeTab.indexOf(self.compare), _translate("Form", "Compare"))
+        self.select_file_btn.setText(_translate("Form", "Select File"))
+        self.export_btn.setText(_translate("Form", "Export"))
 
 
 if __name__ == "__main__":
     import sys
-    
     app = QtWidgets.QApplication(sys.argv)
-    pixmap = QtGui.QPixmap("icon.png")
-    splash = QtWidgets.QSplashScreen(pixmap)
-    splash.resize(500,500)
-    splash.show()
-    splash.showMessage('Running...')
-    app.processEvents()
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    splash.finish(MainWindow)
-    MainWindow.show()
+    Form = QtWidgets.QWidget()
+    ui = Ui_Form()
+    ui.setupUi(Form)
+    Form.show()
     sys.exit(app.exec())
