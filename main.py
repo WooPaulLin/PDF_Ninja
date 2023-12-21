@@ -14,11 +14,13 @@ import difflib
 
 class Ui_Form(object):
     def setupUi(self, Form):
+        
         Form.setObjectName("Form")
-        Form.resize(875, 913)
+        Form.resize(1000, 850)
         Form.setTabletTracking(False)
+        Form.setFixedSize(1000, 850)
         self.modeTab = QtWidgets.QTabWidget(parent=Form)
-        self.modeTab.setGeometry(QtCore.QRect(20, 40, 831, 861))
+        self.modeTab.setGeometry(QtCore.QRect(5, 40, 990, 861))
         self.modeTab.setObjectName("modeTab")
         self.mode = 0
         def mode_change():
@@ -110,7 +112,7 @@ class Ui_Form(object):
         self.convert.setObjectName("convert")
 
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.convert)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 821, 791))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 990, 750))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
 
         self.convertLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
@@ -129,7 +131,7 @@ class Ui_Form(object):
         self.convertLayout.addWidget(self.convertTextBrowser)
 
         self.covert_btn = QtWidgets.QPushButton(parent=self.convert)
-        self.covert_btn.setGeometry(QtCore.QRect(360, 800, 113, 32))
+        self.covert_btn.setGeometry(QtCore.QRect(440, 750, 113, 32))
         self.covert_btn.setObjectName("covert_btn")
 
         self.text = None
@@ -157,7 +159,7 @@ class Ui_Form(object):
         self.compare = QtWidgets.QWidget()
         self.compare.setObjectName("compare")
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=self.compare)
-        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(0, -1, 821, 791))
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(0, -1, 990, 750))
         self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
         self.compareLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
         self.compareLayout.setContentsMargins(0, 0, 0, 0)
@@ -171,12 +173,12 @@ class Ui_Form(object):
 
 
         self.compare_btn = QtWidgets.QPushButton(parent=self.compare)
-        self.compare_btn.setGeometry(QtCore.QRect(360, 800, 113, 32))
+        self.compare_btn.setGeometry(QtCore.QRect(440, 750, 113, 32))
         self.compare_btn.setObjectName("compare_btn")
         def compare_diff():
             try:
-                self.c1 = ('<br> '.join(self.c1.splitlines())).split()
-                self.c2 = ('<br> '.join(self.c2.splitlines())).split()
+                self.c1 = ('<p>!#!'.join(self.c1.splitlines()))
+                self.c2 = ('<p>!#!'.join(self.c2.splitlines()))
                 s = difflib.SequenceMatcher(None, self.c1, self.c2)
                 opc = s.get_opcodes()
             except:
@@ -190,16 +192,15 @@ class Ui_Form(object):
                     x = difflib.SequenceMatcher(lambda x : x in ' ',''.join(self.c1[o1:o2]),''.join(self.c2[n1:n2])).ratio()
                     
                     if x < 0.95:
-                        print(x)
-                        c1_comp.append('<p style="color:blue;">' + ''.join(self.c1[o1:o2])+ "</p>")
-                        c2_comp.append('<p style="color:yellow;">' + ''.join(self.c2[n1:n2]) + "</p>")
+                        c1_comp.append('<span style="color:yellow; display:inline">' + ''.join(self.c1[o1:o2])+ "</span>")
+                        c2_comp.append('<span style="color:yellow; display:inline">' + ''.join(self.c2[n1:n2]) + "</span>")
                     else:
                         c1_comp.append(" ".join(self.c1[o1:o2]))
                         c2_comp.append(" ".join(self.c2[n1:n2]))
                 elif tag == 'insert':
-                    c2_comp.append('<p style="color:green;">' + ''.join(self.c2[n1:n2]) + "</p>")
+                    c2_comp.append('<span style="color:green; display:inline">' + ''.join(self.c2[n1:n2]) + "</span>")
                 elif tag == 'delete':
-                    c1_comp.append('<p style="color:red;">' + ''.join(self.c1[o1:o2])+ "</p>")
+                    c1_comp.append('<span style="color:red; display:inline">' + ''.join(self.c1[o1:o2]) + "</span>")
                 else:
                     c1_comp.append("".join(self.c1[o1:o2]))
                     c2_comp.append("".join(self.c2[n1:n2]))
@@ -207,10 +208,10 @@ class Ui_Form(object):
             </head>
             <body>
             '''
-            self.c1 = temp+''.join(c1_comp)+'''</body></html>'''
+            self.c1 = temp+''.join(''.join(c1_comp).split('!#!'))+'''</body></html>'''
             self.compareTextBrowser1.clear()
             self.compareTextBrowser1.setHtml(self.c1)
-            self.c2 = temp+''.join(c2_comp)+'''</body></html>'''
+            self.c2 = temp+''.join(''.join(c2_comp).split('!#!'))+'''</body></html>'''
             self.compareTextBrowser2.clear()
             self.compareTextBrowser2.setHtml(self.c2)
         self.compare_btn.clicked.connect(compare_diff)
