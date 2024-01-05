@@ -241,9 +241,9 @@ class Ui_Form(object):
                     c2_comp.append(ntmp)
  
                 elif tag == 'insert':
-                    c2_comp.append('<span style="color:green; display:inline">' + '<br>'.join(self.c2[n1:n2]) + "</span>")
+                    c2_comp.append('<span style="background-color:#58D68D; display:inline">' + '<br>'.join(self.c2[n1:n2]) + "</span>")
                 elif tag == 'delete':
-                    c1_comp.append('<span style="color:red; display:inline">' + '<br>'.join(self.c1[o1:o2]) + "</span>")
+                    c1_comp.append('<span style="background-color:#F5B7B1; display:inline">' + '<br>'.join(self.c1[o1:o2]) + "</span>")
                 else:
                     c1_comp.append("<br>".join(self.c1[o1:o2]))
                     c2_comp.append("<br>".join(self.c2[n1:n2]))
